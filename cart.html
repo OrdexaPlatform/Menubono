@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بافلو بونو | سلة الطلبات</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="bottom-nav">
+      <a href="index.html">🍔 المنيو</a>
+      <a href="cart.html" class="active">🛒 السلة (<span id="cartCountBadge">0</span>)</a>
+      <a href="manage-items.html">⚙️ إدارة الأصناف</a>
+      <a href="backgrounds.html">🖼️ الخلفيات</a>
+    </nav>
+
+    <div class="cart-page">
+      <h2>🧾 سلة المشتريات</h2>
+      <div id="cartItemsList" class="cart-items-list"></div>
+      <div class="cart-summary">
+        <p>المجموع الفرعي: <span id="subtotal">0</span> ج.م</p>
+        <p>الضريبة (10%): <span id="tax">0</span> ج.م</p>
+        <p>التوصيل: <span id="deliveryFee">0</span> ج.م</p>
+        <h3>الإجمالي: <span id="total">0</span> ج.م</h3>
+      </div>
+
+      <div class="customer-form">
+        <h3>📋 بيانات العميل</h3>
+        <input type="text" id="custName" placeholder="الاسم كاملاً *">
+        <input type="tel" id="custPhone" placeholder="رقم الجوال *">
+        <input type="tel" id="altPhone" placeholder="رقم بديل (اختياري)">
+        <select id="governorateSelect">
+          <option value="Qalyubia">القليوبية</option>
+          <option value="Cairo">القاهرة</option>
+        </select>
+        <select id="citySelect"></select>
+        <textarea id="fullAddress" rows="2" placeholder="العنوان بالكامل + معلم بارز *"></textarea>
+        <button id="confirmOrderBtn" class="confirm-btn">✅ تأكيد الطلب وإرسال إلى تليجرام</button>
+      </div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    let currentCart = [];
+
+    function updateCities() {
+      const gov = document.getElementById('governorateSelect').value;
+      const citySelect = document.getElementById('citySelect');
+      const options = gov === 'Qalyubia' ? ['الخصوص', 'بنها', 'شبرا الخيمة'] : ['مدينة نصر', 'الرحاب', 'القاهرة الجديدة'];
+      citySelect.innerHTML = options.map(c => `<option value="${c}">${c}</option>`).join('');
+      updateDeliveryAndTotal();
+    }
+
+    function getDeliveryFee() {
+      const gov = document.getElementById('governorateSelect').value;
+      return gov === 'Qalyubia' ? 20 : 25;
+    }
+
+    function updateDeliveryAndTotal() {
+      const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * 0.1;
+      const delivery = getDeliveryFee();
+      const total = subtotal + tax + delivery;
+      document.getElementById('subtotal').innerText = subtotal.toFixed(2);
+      document.getElementById('tax').innerText = tax.toFixed(2);
+      document.getElementById('deliveryFee').innerText = delivery;
+      document.getElementById('total').innerText = total.toFixed(2);
+    }
+
+    function renderCartItems() {
+      const container = document.getElementById('cartItemsList');
+      if (!currentCart.length) {
+        container.innerHTML = '<div class="empty-cart">🛒 السلة فارغة، أضف بعض الأصناف من المنيو.</div>';
+        updateDeliveryAndTotal();
+        return;
+      }
+      container.innerHTML = currentCart.map(item => `
+        <div class="cart-item" data-id="${item.id}">
+          <div class="cart-item-details">
+            <h4>${item.name}</h4>
+            <div class="cart-price">${item.price} ج.م</div>
+          </div>
+          <div class="cart-actions">
+            <input type="number" min="1" value="${item.quantity}" class="cart-qty" data-id="${item.id}">
+            <button class="remove-item" data-id="${item.id}">🗑️ حذف</button>
+          </div>
+        </div>
+      `).join('');
+
+      // أحداث تغيير الكمية
+      document.querySelectorAll('.cart-qty').forEach(inp => {
+        inp.onchange = (e) => {
+          const id = inp.getAttribute('data-id');
+          let newQty = parseInt(inp.value);
+          if (isNaN(newQty) || newQty < 1) newQty = 1;
+          updateCartItemQuantity(id, newQty);
+          currentCart = getCartWithDetails(); // إعادة تحميل السلة مع التفاصيل
+          renderCartItems();
+          updateDeliveryAndTotal();
+          updateCartBadge();
+        };
+      });
+
+      document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.onclick = (e) => {
+          const id = btn.getAttribute('data-id');
+          removeFromCart(id);
+          currentCart = getCartWithDetails();
+          renderCartItems();
+          updateDeliveryAndTotal();
+          updateCartBadge();
+        };
+      });
+      updateDeliveryAndTotal();
+    }
+
+    function updateCartBadge() {
+      const cart = getCart();
+      const total = cart.reduce((sum, i) => sum + i.quantity, 0);
+      const badge = document.getElementById('cartCountBadge');
+      if (badge) badge.innerText = total;
+    }
+
+    async function sendOrderToTelegram() {
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const altPhone = document.getElementById('altPhone').value.trim();
+      const gov = document.getElementById('governorateSelect').options[document.getElementById('governorateSelect').selectedIndex]?.text;
+      const city = document.getElementById('citySelect').value;
+      const address = document.getElementById('fullAddress').value.trim();
+
+      if (!name || !phone || !address) {
+        alert('❌ الرجاء ملء الاسم، رقم الجوال، والعنوان.');
+        return false;
+      }
+      if (!currentCart.length) {
+        alert('السلة فارغة!');
+        return false;
+      }
+
+      const orderNumber = getNextOrderNumber();
+      let itemsText = '';
+      currentCart.forEach(item => {
+        itemsText += `${item.name} × ${item.quantity} = ${item.price * item.quantity} ج.م\n`;
+      });
+      const subtotal = currentCart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      const tax = subtotal * 0.1;
+      const delivery = getDeliveryFee();
+      const total = subtotal + tax + delivery;
+      const altLine = altPhone ? `📞 رقم بديل: ${altPhone}\n` : '';
+
+      const message = `🍔 طلب جديد من بافلو بونو 🍔
+🧾 رقم الطلب: #${orderNumber}
+
+👤 الاسم: ${name}
+📞 الجوال: ${phone}
+${altLine}📍 العنوان: ${address}, ${city} - ${gov}
+--------------------------------
+${itemsText}
+💰 المجموع: ${subtotal} ج.م
+🧾 ضريبة 10%: ${tax} ج.م
+🚚 التوصيل: ${delivery} ج.م
+💵 الإجمالي: ${total} ج.م
+
+شكراً لطلبكم!`;
+
+      const BOT_TOKEN = "8748571642:AAGMmoWmXH3ewRPow5igyacYkamBpeJ3jd0";
+      const CHAT_ID = "987968411";
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`✅ تم إرسال طلبك بنجاح! رقم الطلب: ${orderNumber}`);
+          clearCart();
+          currentCart = [];
+          renderCartItems();
+          updateCartBadge();
+          document.getElementById('custName').value = '';
+          document.getElementById('custPhone').value = '';
+          document.getElementById('altPhone').value = '';
+          document.getElementById('fullAddress').value = '';
+          return true;
+        } else {
+          alert('❌ فشل الإرسال إلى تليجرام، حاول مرة أخرى.');
+          return false;
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ خطأ في الشبكة، تأكد من اتصالك بالإنترنت.');
+        return false;
+      }
+    }
+
+    // تهيئة الصفحة
+    initData();
+    currentCart = getCartWithDetails();
+    renderCartItems();
+    updateCartBadge();
+    updateCities();
+
+    document.getElementById('governorateSelect').addEventListener('change', () => {
+      updateCities();
+      updateDeliveryAndTotal();
+    });
+    document.getElementById('citySelect').addEventListener('change', () => updateDeliveryAndTotal());
+    document.getElementById('confirmOrderBtn').addEventListener('click', sendOrderToTelegram);
+  </script>
+</body>
+</html>
