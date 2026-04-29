@@ -1,238 +1,127 @@
-// ---------- البيانات والمفاتيح ----------
-const STORAGE_KEYS = {
-  MENU_ITEMS: 'bono_menu_items',
-  CATEGORIES: 'bono_categories',
-  CART: 'bono_cart',
-  BACKGROUNDS: 'bono_backgrounds',
-  NEXT_ORDER: 'bono_next_order'
-};
+import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from './firebase-init.js';
 
-// الفئات الافتراضية (يمكن تعديلها لاحقاً من الكود)
-const DEFAULT_CATEGORIES = [
-  { id: "beef", nameAr: "🍔 برجر لحم بقري" },
-  { id: "chicken", nameAr: "🍗 برجر دجاج" },
-  { id: "fries", nameAr: "🍟 مقليات" },
-  { id: "sauces", nameAr: "🥣 صوصات" },
-  { id: "combos", nameAr: "🍔🍟 وجبات كاملة" }
-];
+// ------------------- Cloudinary -------------------
+const CLOUDINARY_CLOUD_NAME = 'dpaiz3gv5';
+const CLOUDINARY_UPLOAD_PRESET = 'bono_uploads';
 
-// الأصناف الافتراضية (إن لم تكن موجودة)
-const DEFAULT_ITEMS = [
-  { id: "b1", categoryId: "beef", nameAr: "بافلو كلاسيك", descAr: "لحم بقري مشوي، صوص بافلو", price: 35, imageSrc: null },
-  { id: "b2", categoryId: "beef", nameAr: "برجر تكساس الحار", descAr: "هلابينو، جبنة ببر جاك", price: 45, imageSrc: null },
-  { id: "c1", categoryId: "chicken", nameAr: "تشيكن مشروم", descAr: "دجاج متبل ومشروم", price: 40, imageSrc: null },
-  { id: "c2", categoryId: "chicken", nameAr: "دجاج حار جداً", descAr: "دجاج مقرمش حار", price: 50, imageSrc: null },
-  { id: "f1", categoryId: "fries", nameAr: "بطاطس عادية", descAr: "بطاطس ذهبية", price: 20, imageSrc: null },
-  { id: "sau1", categoryId: "sauces", nameAr: "صوص بافلو", descAr: "صوص بافلو الأصلي", price: 15, imageSrc: null },
-  { id: "combo1", categoryId: "combos", nameAr: "وجبة كلاسيك", descAr: "ساندوتش + بطاطس + مشروب", price: 85, imageSrc: null }
-];
-
-// ---------- دوال التهيئة ----------
-function initData() {
-  if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES)) {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(DEFAULT_CATEGORIES));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.MENU_ITEMS)) {
-    localStorage.setItem(STORAGE_KEYS.MENU_ITEMS, JSON.stringify(DEFAULT_ITEMS));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.CART)) {
-    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify([]));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.BACKGROUNDS)) {
-    localStorage.setItem(STORAGE_KEYS.BACKGROUNDS, JSON.stringify({
-      heroImage: null,
-      defaultItemImage: null,
-      siteTitle: 'بافلو بونو',
-      siteSubtitle: 'أشهى المأكولات'
-    }));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.NEXT_ORDER)) {
-    localStorage.setItem(STORAGE_KEYS.NEXT_ORDER, '1000');
-  }
+export async function uploadImageToCloudinary(file) {
+  if (!file) return null;
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(url, { method: 'POST', body: formData });
+  if (!response.ok) throw new Error('فشل رفع الصورة');
+  const data = await response.json();
+  return data.secure_url;
 }
 
-function getAllCategories() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];
+// ------------------- الفئات -------------------
+export async function getAllCategories() {
+  const snapshot = await getDocs(collection(db, 'categories'));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+export async function addCategory(category) {
+  const id = `cat_${Date.now()}`;
+  await setDoc(doc(db, 'categories', id), { nameAr: category.nameAr, createdAt: new Date() });
+  return id;
+}
+export async function updateCategory(id, newName) {
+  await updateDoc(doc(db, 'categories', id), { nameAr: newName });
+}
+export async function deleteCategory(id) {
+  const items = await getAllMenuItems();
+  const toDelete = items.filter(i => i.categoryId === id);
+  for (const item of toDelete) await deleteMenuItem(item.id);
+  await deleteDoc(doc(db, 'categories', id));
 }
 
-function getAllMenuItems() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.MENU_ITEMS)) || [];
+// ------------------- الأصناف -------------------
+export async function getAllMenuItems() {
+  const snapshot = await getDocs(collection(db, 'menu_items'));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+export async function addMenuItem(item) {
+  const id = `item_${Date.now()}`;
+  await setDoc(doc(db, 'menu_items', id), { ...item, createdAt: new Date() });
+  return id;
+}
+export async function updateMenuItem(id, data) {
+  await updateDoc(doc(db, 'menu_items', id), data);
+}
+export async function deleteMenuItem(id) {
+  await deleteDoc(doc(db, 'menu_items', id));
 }
 
-function saveMenuItems(items) {
-  localStorage.setItem(STORAGE_KEYS.MENU_ITEMS, JSON.stringify(items));
+// ------------------- إعدادات الموقع (خلفيات) -------------------
+export async function getBackgroundSettings() {
+  const snapshot = await getDocs(collection(db, 'settings'));
+  const docSnap = snapshot.docs.find(d => d.id === 'appearance');
+  if (docSnap) return docSnap.data();
+  const defaults = { heroImage: '', defaultItemImage: '', siteTitle: 'بافلو بونو', siteSubtitle: 'طعم يستحق التجربة' };
+  await setDoc(doc(db, 'settings', 'appearance'), defaults);
+  return defaults;
+}
+export async function saveBackgroundSettings(settings) {
+  await setDoc(doc(db, 'settings', 'appearance'), settings, { merge: true });
 }
 
-// إضافة / تعديل / حذف صنف
-function addNewMenuItem(itemData) {
-  const items = getAllMenuItems();
-  const newId = Date.now().toString() + Math.random().toString(36);
-  const newItem = { id: newId, ...itemData };
-  items.push(newItem);
-  saveMenuItems(items);
+// ------------------- السلة (LocalStorage) -------------------
+export function getCart() {
+  return JSON.parse(localStorage.getItem('bono_cart') || '[]');
 }
-
-function updateMenuItem(id, updatedData) {
-  let items = getAllMenuItems();
-  const index = items.findIndex(i => i.id === id);
-  if (index !== -1) {
-    items[index] = { ...items[index], ...updatedData };
-    saveMenuItems(items);
-  }
+export function saveCart(cart) {
+  localStorage.setItem('bono_cart', JSON.stringify(cart));
 }
-
-function deleteMenuItem(id) {
-  let items = getAllMenuItems();
-  items = items.filter(i => i.id !== id);
-  saveMenuItems(items);
-}
-
-// ------ السلة ------
-function getCart() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.CART)) || [];
-}
-function saveCart(cart) {
-  localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
-}
-function addToCart(productId) {
+export function addToCart(productId) {
   let cart = getCart();
   const existing = cart.find(i => i.id === productId);
   if (existing) existing.quantity++;
   else cart.push({ id: productId, quantity: 1 });
   saveCart(cart);
 }
-function removeFromCart(productId) {
+export function removeFromCart(productId) {
   let cart = getCart();
   cart = cart.filter(i => i.id !== productId);
   saveCart(cart);
 }
-function updateCartItemQuantity(productId, newQty) {
+export function updateCartItemQuantity(productId, newQty) {
   let cart = getCart();
   const item = cart.find(i => i.id === productId);
   if (item) item.quantity = newQty;
   saveCart(cart);
 }
-function clearCart() {
-  saveCart([]);
-}
-// دالة لجلب تفاصيل السلة (الاسم والسعر من الأصناف)
-function getCartWithDetails() {
+export function clearCart() { saveCart([]); }
+export async function getCartWithDetails() {
   const cart = getCart();
-  const items = getAllMenuItems();
+  const items = await getAllMenuItems();
   return cart.map(c => {
-    const product = items.find(p => p.id === c.id);
-    return {
-      id: c.id,
-      quantity: c.quantity,
-      name: product ? product.nameAr : 'غير معروف',
-      price: product ? product.price : 0
-    };
+    const prod = items.find(p => p.id === c.id);
+    return { id: c.id, quantity: c.quantity, name: prod?.nameAr || 'غير معروف', price: prod?.price || 0 };
   }).filter(i => i.price > 0);
 }
 
-// ------ إعدادات الخلفيات ------
-function getBackgroundSettings() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.BACKGROUNDS)) || {};
-}
-function saveBackgroundSettings(settings) {
-  localStorage.setItem(STORAGE_KEYS.BACKGROUNDS, JSON.stringify(settings));
-}
-function getDefaultItemImage() {
-  const bg = getBackgroundSettings();
-  return bg.defaultItemImage || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23333"/%3E%3Ctext x="50" y="55" text-anchor="middle" fill="%23aaa"%3E🍔%3C/text%3E%3C/svg%3E';
-}
-
-// ------ رقم الطلب المتزايد ------
-function getNextOrderNumber() {
-  let next = parseInt(localStorage.getItem(STORAGE_KEYS.NEXT_ORDER)) || 1000;
-  localStorage.setItem(STORAGE_KEYS.NEXT_ORDER, (next + 1).toString());
-  return next;
+// ------------------- رقم الطلب -------------------
+export async function getNextOrderNumber() {
+  const snapshot = await getDocs(collection(db, 'settings'));
+  const counterDoc = snapshot.docs.find(d => d.id === 'orderCounter');
+  let current = 1000;
+  if (counterDoc) current = counterDoc.data().value;
+  const newVal = current + 1;
+  await setDoc(doc(db, 'settings', 'orderCounter'), { value: newVal });
+  return newVal;
 }
 
-// Toast بسيط (اختياري)
-function showToast(msg) {
+// ------------------- مساعدات -------------------
+export function showToast(msg) {
   let toast = document.getElementById('dynamicToast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'dynamicToast';
-    toast.style.position = 'fixed';
-    toast.style.bottom = '80px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.backgroundColor = '#f9b23f';
-    toast.style.color = '#111';
-    toast.style.padding = '8px 20px';
-    toast.style.borderRadius = '50px';
-    toast.style.zIndex = '999';
-    toast.style.fontWeight = 'bold';
+    toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#f5b642; color:#000; padding:8px 20px; border-radius:50px; z-index:999; opacity:0; transition:0.2s; font-weight:bold';
     document.body.appendChild(toast);
   }
   toast.innerText = msg;
   toast.style.opacity = '1';
   setTimeout(() => toast.style.opacity = '0', 2000);
 }
-// كل التوابع السابقة موجودة، سأضع فقط ما قد يكون مختلفاً أو ناقصاً
-// ... (نفس الكود السابق لكن أضف دالة getCartWithDetails كما في المثال التالي)
-
-function getCartWithDetails() {
-  const cart = getCart();
-  const items = getAllMenuItems();
-  return cart.map(c => {
-    const product = items.find(p => p.id === c.id);
-    return {
-      id: c.id,
-      quantity: c.quantity,
-      name: product ? product.nameAr : 'غير معروف',
-      price: product ? product.price : 0
-    };
-  }).filter(i => i.price > 0);
-}
-
-// تأكد من وجود showToast محسنة
-window.showToast = function(msg) {
-  let toast = document.getElementById('dynamicToast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'dynamicToast';
-    document.body.appendChild(toast);
-  }
-  toast.innerText = msg;
-  toast.style.opacity = '1';
-  setTimeout(() => toast.style.opacity = '0', 2000);
-};
-// دوال إدارة الفئات
-function getAllCategories() {
-  return JSON.parse(localStorage.getItem('bono_categories')) || [];
-}
-
-function saveCategories(categories) {
-  localStorage.setItem('bono_categories', JSON.stringify(categories));
-}
-
-// دالة لحذف صنف (موجودة بالفعل لكن نؤكد)
-function deleteMenuItem(id) {
-  let items = getAllMenuItems();
-  items = items.filter(i => i.id !== id);
-  saveMenuItems(items);
-}
-
-// دالة تعديل صنف (موجودة)
-function updateMenuItem(id, updatedData) {
-  let items = getAllMenuItems();
-  const index = items.findIndex(i => i.id === id);
-  if (index !== -1) {
-    items[index] = { ...items[index], ...updatedData };
-    saveMenuItems(items);
-  }
-}
-
-// دالة قراءة الملف (إذا لم تكن موجودة)
-function readFileAsBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-  }
-
