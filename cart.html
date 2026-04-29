@@ -2,73 +2,70 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BONO | سلة الطلبات</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0a; color: #f0efe7; font-family: 'Inter', sans-serif; direction: rtl; }
-    .app { max-width: 600px; margin: 0 auto; background: #0f0f0f; min-height: 100vh; padding-bottom: 70px; }
-    .main-header { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #2c2c2c; z-index: 100; }
-    .logo { font-weight: 800; font-size: 1.6rem; background: linear-gradient(135deg,#f5b642,#ffdd99); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .back-btn { background: none; border: none; color: #f5b642; font-size: 1rem; cursor: pointer; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: #0a0a0a; color: #fff; direction: rtl; }
+    .app { max-width: 600px; margin: 0 auto; background: #0f0f0f; min-height: 100vh; padding-bottom: 75px; }
+    .main-header { position: sticky; top: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #2a2a2a; }
+    .logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #f5b642, #ffdd99); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .back-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #f5b642; }
     .cart-main { padding: 20px; }
-    .cart-item { background: #141414; border-radius: 24px; padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2c2c2c; }
+    .cart-item { background: #141414; border-radius: 20px; padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a2a; }
     .cart-item-info h4 { font-size: 1rem; }
-    .cart-item-price { color: #f5b642; font-weight: bold; }
-    .cart-item-controls { display: flex; gap: 8px; align-items: center; }
-    .cart-item-controls button { background: #2c2c2c; border: none; width: 32px; height: 32px; border-radius: 30px; cursor: pointer; font-weight: bold; color: white; }
+    .cart-item-price { color: #f5b642; font-size: 0.9rem; }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .cart-item-controls button { background: #2a2a2a; border: none; width: 32px; height: 32px; border-radius: 30px; font-weight: bold; cursor: pointer; color: white; }
     .qty-num { font-weight: bold; min-width: 24px; text-align: center; }
-    .remove-item-btn { background: #3a1e1e !important; color: #ff8a5c !important; }
-    .order-summary, .customer-info-card { background: #111; border-radius: 28px; padding: 20px; margin-top: 20px; border: 1px solid #2c2c2c; }
-    .summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #2c2c2c; }
+    .order-summary, .customer-info-card { background: #1c1c1c; border-radius: 24px; padding: 16px; margin-top: 20px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #2a2a2a; }
     .summary-row.total { border-bottom: none; font-weight: 800; font-size: 1.2rem; color: #f5b642; }
-    .customer-info-card input, .customer-info-card select, .customer-info-card textarea { width: 100%; margin-bottom: 12px; padding: 12px; background: #242424; border: 1px solid #3d3d3d; border-radius: 28px; color: white; font-family: inherit; }
-    .confirm-order-btn { background: #f5b642; width: 100%; border: none; padding: 14px; border-radius: 60px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-    .empty-cart { text-align: center; padding: 60px 20px; color: #b0a890; }
-    .empty-cart a { color: #f5b642; text-decoration: none; }
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2c2c2c; z-index: 99; }
-    .nav-item { color: #b0a890; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; }
+    .customer-info-card input, .customer-info-card select, .customer-info-card textarea { width: 100%; margin-bottom: 12px; padding: 12px; background: #242424; border: 1px solid #3d3d3d; border-radius: 40px; color: white; font-family: inherit; }
+    .confirm-order-btn { width: 100%; background: #f5b642; border: none; padding: 14px; border-radius: 60px; font-weight: 800; font-size: 1rem; cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2a2a; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #aaa; text-decoration: none; font-size: 0.7rem; }
     .nav-item.active { color: #f5b642; font-weight: bold; }
+    .nav-icon { font-size: 1.4rem; }
+    .empty-cart { text-align: center; padding: 40px; color: #aaa; }
+    .empty-cart a { color: #f5b642; text-decoration: none; }
   </style>
 </head>
 <body>
 <div class="app">
   <header class="main-header">
     <div class="logo">🛒 سلة الطلبات</div>
-    <button id="backToMenuBtn" class="back-btn">← العودة</button>
+    <button id="backBtn" class="back-btn">← العودة</button>
   </header>
   <main class="cart-main">
-    <div id="cartItemsSection">جاري التحميل...</div>
-    <div id="summarySection" style="display: none;">
-      <div class="order-summary">
-        <h3>ملخص الطلب</h3>
-        <div class="summary-row"><span>المجموع الفرعي</span><span id="subtotal">0</span> ج.م</div>
-        <div class="summary-row"><span>الضريبة (10%)</span><span id="tax">0</span> ج.م</div>
-        <div class="summary-row"><span>رسوم التوصيل</span><span id="deliveryFee">0</span> ج.م</div>
-        <div class="summary-row total"><span>الإجمالي</span><span id="total">0</span> ج.م</div>
-      </div>
-      <div class="customer-info-card">
-        <h3>معلومات التوصيل</h3>
-        <input type="text" id="custName" placeholder="الاسم الكامل *">
-        <input type="tel" id="custPhone" placeholder="رقم الجوال *">
-        <input type="tel" id="altPhone" placeholder="رقم بديل (اختياري)">
-        <select id="governorateSelect"><option value="Qalyubia">القليوبية</option><option value="Cairo">القاهرة</option></select>
-        <select id="citySelect"></select>
-        <textarea id="fullAddress" rows="2" placeholder="العنوان بالكامل + معلم بارز *"></textarea>
-        <button id="confirmOrderBtn" class="confirm-order-btn">✅ تأكيد الطلب وإرسال</button>
-      </div>
+    <div id="cartItemsSection"></div>
+    <div class="order-summary">
+      <h3>ملخص الطلب</h3>
+      <div class="summary-row"><span>المجموع الفرعي</span><span id="subtotal">0</span> ج.م</div>
+      <div class="summary-row"><span>الضريبة (10%)</span><span id="tax">0</span> ج.م</div>
+      <div class="summary-row"><span>رسوم التوصيل</span><span id="deliveryFee">0</span> ج.م</div>
+      <div class="summary-row total"><span>الإجمالي</span><span id="total">0</span> ج.م</div>
+    </div>
+    <div class="customer-info-card">
+      <h3>معلومات التوصيل</h3>
+      <input type="text" id="custName" placeholder="الاسم الكامل *">
+      <input type="tel" id="custPhone" placeholder="رقم الجوال *">
+      <input type="tel" id="altPhone" placeholder="رقم بديل (اختياري)">
+      <select id="governorateSelect"><option value="Qalyubia">القليوبية</option><option value="Cairo">القاهرة</option></select>
+      <select id="citySelect"></select>
+      <textarea id="fullAddress" rows="2" placeholder="العنوان بالكامل + معلم بارز *"></textarea>
+      <button id="confirmOrderBtn" class="confirm-order-btn">✅ تأكيد الطلب وإرسال</button>
     </div>
   </main>
   <nav class="bottom-nav">
-    <a href="index.html" class="nav-item">🍽️ المنيو</a>
-    <a href="cart.html" class="nav-item active">🛒 السلة</a>
-    <a href="manage-items.html" class="nav-item">⚙️ إدارة</a>
-    <a href="backgrounds.html" class="nav-item">🎨 خلفيات</a>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🍽️</span><span>المنيو</span></a>
+    <a href="cart.html" class="nav-item active"><span class="nav-icon">🛒</span><span>السلة</span></a>
+    <a href="manage-items.html" class="nav-item"><span class="nav-icon">⚙️</span><span>إدارة</span></a>
+    <a href="backgrounds.html" class="nav-item"><span class="nav-icon">🎨</span><span>خلفيات</span></a>
   </nav>
 </div>
 <script type="module">
-  import { getCartWithDetails, clearCart, getNextOrderNumber, showToast, getAllMenuItems } from './common.js';
+  import { getCartWithDetails, clearCart, getNextOrderNumber, getAllMenuItems } from './common.js';
 
   let currentCart = [];
 
@@ -79,14 +76,11 @@
     citySelect.innerHTML = options.map(c => `<option value="${c}">${c}</option>`).join('');
     updateTotals();
   }
-
   function getDeliveryFee() {
-    const gov = document.getElementById('governorateSelect').value;
-    return gov === 'Qalyubia' ? 20 : 30;
+    return document.getElementById('governorateSelect').value === 'Qalyubia' ? 20 : 30;
   }
-
-  function updateTotals() {
-    const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  async function updateTotals() {
+    const subtotal = currentCart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const tax = subtotal * 0.1;
     const delivery = getDeliveryFee();
     const total = subtotal + tax + delivery;
@@ -95,39 +89,43 @@
     document.getElementById('deliveryFee').innerText = delivery;
     document.getElementById('total').innerText = total.toFixed(2);
   }
-
   async function renderCartItems() {
     currentCart = await getCartWithDetails();
     const container = document.getElementById('cartItemsSection');
-    const summaryDiv = document.getElementById('summarySection');
     if (!currentCart.length) {
       container.innerHTML = `<div class="empty-cart">🛒 سلة المشتريات فارغة<br><a href="index.html">اذهب لاستعراض المنيو</a></div>`;
-      summaryDiv.style.display = 'none';
+      updateTotals();
       return;
     }
-    summaryDiv.style.display = 'block';
-    container.innerHTML = currentCart.map(item => `
-      <div class="cart-item" data-id="${item.id}">
-        <div class="cart-item-info">
-          <h4>${item.name}</h4>
-          <div class="cart-item-price">${item.price} ج.م</div>
-        </div>
+    container.innerHTML = '';
+    for (let i = 0; i < currentCart.length; i++) {
+      const item = currentCart[i];
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div class="cart-item-info"><h4>${item.name}</h4><div class="cart-item-price">${item.price} ج.م</div></div>
         <div class="cart-item-controls">
           <button class="qty-decr" data-id="${item.id}">−</button>
           <span class="qty-num">${item.quantity}</span>
           <button class="qty-incr" data-id="${item.id}">+</button>
-          <button class="remove-item-btn" data-id="${item.id}">🗑️</button>
+          <button class="remove-item" data-id="${item.id}">🗑️</button>
         </div>
-      </div>
-    `).join('');
-
-    document.querySelectorAll('.qty-incr').forEach(btn => btn.onclick = () => changeQuantity(btn.dataset.id, 1));
-    document.querySelectorAll('.qty-decr').forEach(btn => btn.onclick = () => changeQuantity(btn.dataset.id, -1));
-    document.querySelectorAll('.remove-item-btn').forEach(btn => btn.onclick = () => removeItem(btn.dataset.id));
+      `;
+      container.appendChild(div);
+    }
+    // ربط الأحداث
+    document.querySelectorAll('.qty-incr').forEach(btn => {
+      btn.onclick = async () => { await changeQuantity(btn.getAttribute('data-id'), 1); };
+    });
+    document.querySelectorAll('.qty-decr').forEach(btn => {
+      btn.onclick = async () => { await changeQuantity(btn.getAttribute('data-id'), -1); };
+    });
+    document.querySelectorAll('.remove-item').forEach(btn => {
+      btn.onclick = async () => { await removeItem(btn.getAttribute('data-id')); };
+    });
     updateTotals();
   }
-
-  function changeQuantity(id, delta) {
+  async function changeQuantity(id, delta) {
     let cart = JSON.parse(localStorage.getItem('bono_cart') || '[]');
     const index = cart.findIndex(i => i.id === id);
     if (index !== -1) {
@@ -135,29 +133,24 @@
       if (newQty <= 0) cart.splice(index, 1);
       else cart[index].quantity = newQty;
       localStorage.setItem('bono_cart', JSON.stringify(cart));
-      renderCartItems();
+      await renderCartItems();
     }
   }
-
-  function removeItem(id) {
+  async function removeItem(id) {
     let cart = JSON.parse(localStorage.getItem('bono_cart') || '[]');
     cart = cart.filter(i => i.id !== id);
     localStorage.setItem('bono_cart', JSON.stringify(cart));
-    renderCartItems();
+    await renderCartItems();
   }
-
   async function sendOrder() {
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
     const altPhone = document.getElementById('altPhone').value.trim();
-    const govSelect = document.getElementById('governorateSelect');
-    const gov = govSelect.options[govSelect.selectedIndex]?.text || govSelect.value;
+    const gov = document.getElementById('governorateSelect').options[document.getElementById('governorateSelect').selectedIndex]?.text;
     const city = document.getElementById('citySelect').value;
     const address = document.getElementById('fullAddress').value.trim();
-
-    if (!name || !phone || !address) return alert('❌ الرجاء ملء الاسم، رقم الجوال، والعنوان');
-    if (!currentCart.length) return alert('السلة فارغة');
-
+    if (!name || !phone || !address) { alert('❌ الرجاء ملء جميع الحقول المطلوبة'); return; }
+    if (!currentCart.length) { alert('🛒 السلة فارغة'); return; }
     const orderNumber = await getNextOrderNumber();
     let itemsText = '';
     currentCart.forEach(item => { itemsText += `${item.name} × ${item.quantity} = ${item.price * item.quantity} ج.م\n`; });
@@ -166,54 +159,32 @@
     const delivery = getDeliveryFee();
     const total = subtotal + tax + delivery;
     const altLine = altPhone ? `📞 بديل: ${altPhone}\n` : '';
-
-    const message = `🍔 طلب جديد من BONO 🍔
-🧾 رقم الطلب: #${orderNumber}
-
-👤 الاسم: ${name}
-📞 جوال: ${phone}
-${altLine}📍 العنوان: ${address}, ${city} - ${gov}
---------------------------------
-${itemsText}
-💰 المجموع الفرعي: ${subtotal} ج.م
-🧾 ضريبة 10%: ${tax} ج.م
-🚚 توصيل: ${delivery} ج.م
-💵 الإجمالي: ${total} ج.م
-
-نشكرك على طلبك! 💛`;
-
+    const msg = `🍔 طلب جديد من BONO 🍔\n🧾 رقم #${orderNumber}\n\n👤 الاسم: ${name}\n📞 جوال: ${phone}\n${altLine}📍 العنوان: ${address}, ${city} - ${gov}\n--------------------------------\n${itemsText}\n💰 المجموع: ${subtotal} ج.م\n🧾 ضريبة: ${tax} ج.م\n🚚 توصيل: ${delivery} ج.م\n💵 الإجمالي: ${total} ج.م\n\nنشكرك على طلبك!`;
     const BOT_TOKEN = "8748571642:AAGMmoWmXH3ewRPow5igyacYkamBpeJ3jd0";
     const CHAT_ID = "987968411";
     try {
       const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
       });
       const data = await res.json();
       if (data.ok) {
         alert(`✅ تم إرسال طلبك بنجاح! رقم الطلب: ${orderNumber}`);
         clearCart();
-        renderCartItems();
+        await renderCartItems();
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
         document.getElementById('altPhone').value = '';
         document.getElementById('fullAddress').value = '';
-      } else {
-        alert('❌ فشل الإرسال إلى تليجرام');
-      }
-    } catch (err) {
-      alert('❌ خطأ في الشبكة');
-    }
+      } else { alert('❌ فشل الإرسال إلى تليجرام'); }
+    } catch (err) { alert('❌ خطأ في الشبكة'); }
   }
-
-  document.getElementById('backToMenuBtn').onclick = () => window.location.href = 'index.html';
   document.getElementById('governorateSelect').addEventListener('change', () => { updateCities(); updateTotals(); });
   document.getElementById('citySelect').addEventListener('change', () => updateTotals());
-  document.getElementById('confirmOrderBtn').onclick = sendOrder;
-
-  await renderCartItems();
+  document.getElementById('confirmOrderBtn').addEventListener('click', sendOrder);
+  document.getElementById('backBtn').addEventListener('click', () => window.location.href = 'index.html');
   updateCities();
+  await renderCartItems();
 </script>
 </body>
 </html>
