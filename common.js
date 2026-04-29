@@ -171,3 +171,32 @@ function showToast(msg) {
   toast.style.opacity = '1';
   setTimeout(() => toast.style.opacity = '0', 2000);
 }
+// كل التوابع السابقة موجودة، سأضع فقط ما قد يكون مختلفاً أو ناقصاً
+// ... (نفس الكود السابق لكن أضف دالة getCartWithDetails كما في المثال التالي)
+
+function getCartWithDetails() {
+  const cart = getCart();
+  const items = getAllMenuItems();
+  return cart.map(c => {
+    const product = items.find(p => p.id === c.id);
+    return {
+      id: c.id,
+      quantity: c.quantity,
+      name: product ? product.nameAr : 'غير معروف',
+      price: product ? product.price : 0
+    };
+  }).filter(i => i.price > 0);
+}
+
+// تأكد من وجود showToast محسنة
+window.showToast = function(msg) {
+  let toast = document.getElementById('dynamicToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'dynamicToast';
+    document.body.appendChild(toast);
+  }
+  toast.innerText = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => toast.style.opacity = '0', 2000);
+};
