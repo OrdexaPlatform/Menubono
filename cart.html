@@ -3,31 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بافلو بونو | سلة الطلبات</title>
+  <title>BONO | سلة الطلبات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <nav class="bottom-nav">
-      <a href="index.html">🍔 المنيو</a>
-      <a href="cart.html" class="active">🛒 السلة (<span id="cartCountBadge">0</span>)</a>
-      <a href="manage-items.html">⚙️ إدارة الأصناف</a>
-      <a href="backgrounds.html">🖼️ الخلفيات</a>
-    </nav>
+  <div class="app">
+    <header class="main-header">
+      <div class="logo">
+        <span class="logo-icon">🛒</span>
+        <span class="logo-text">سلة الطلبات</span>
+      </div>
+      <div class="header-actions">
+        <button id="backToMenuBtn" class="icon-btn">← العودة</button>
+      </div>
+    </header>
 
-    <div class="cart-page">
-      <h2>🧾 سلة المشتريات</h2>
-      <div id="cartItemsList" class="cart-items-list"></div>
-      <div class="cart-summary">
-        <p>المجموع الفرعي: <span id="subtotal">0</span> ج.م</p>
-        <p>الضريبة (10%): <span id="tax">0</span> ج.م</p>
-        <p>التوصيل: <span id="deliveryFee">0</span> ج.م</p>
-        <h3>الإجمالي: <span id="total">0</span> ج.م</h3>
+    <main class="cart-main">
+      <div class="cart-items-section" id="cartItemsSection">
+        <!-- سيتم عرض السلة ديناميكياً -->
       </div>
 
-      <div class="customer-form">
-        <h3>📋 بيانات العميل</h3>
-        <input type="text" id="custName" placeholder="الاسم كاملاً *">
+      <div class="order-summary">
+        <h3>ملخص الطلب</h3>
+        <div class="summary-row">
+          <span>المجموع الفرعي</span>
+          <span id="subtotal">0</span> ج.م
+        </div>
+        <div class="summary-row">
+          <span>الضريبة (10%)</span>
+          <span id="tax">0</span> ج.م
+        </div>
+        <div class="summary-row">
+          <span>رسوم التوصيل</span>
+          <span id="deliveryFee">0</span> ج.م
+        </div>
+        <div class="summary-row total">
+          <span>الإجمالي</span>
+          <span id="total">0</span> ج.م
+        </div>
+      </div>
+
+      <div class="customer-info-card">
+        <h3>معلومات التوصيل</h3>
+        <input type="text" id="custName" placeholder="الاسم الكامل *">
         <input type="tel" id="custPhone" placeholder="رقم الجوال *">
         <input type="tel" id="altPhone" placeholder="رقم بديل (اختياري)">
         <select id="governorateSelect">
@@ -36,10 +55,18 @@
         </select>
         <select id="citySelect"></select>
         <textarea id="fullAddress" rows="2" placeholder="العنوان بالكامل + معلم بارز *"></textarea>
-        <button id="confirmOrderBtn" class="confirm-btn">✅ تأكيد الطلب وإرسال إلى تليجرام</button>
+        <button id="confirmOrderBtn" class="confirm-order-btn">✅ تأكيد الطلب وإرسال</button>
       </div>
-    </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">🍽️ المنيو</a>
+      <a href="cart.html" class="nav-item active">🛒 السلة</a>
+      <a href="manage-items.html" class="nav-item">⚙️ إدارة</a>
+      <a href="backgrounds.html" class="nav-item">🎨 خلفيات</a>
+    </nav>
   </div>
+
   <script src="common.js"></script>
   <script>
     let currentCart = [];
@@ -47,17 +74,17 @@
     function updateCities() {
       const gov = document.getElementById('governorateSelect').value;
       const citySelect = document.getElementById('citySelect');
-      const options = gov === 'Qalyubia' ? ['الخصوص', 'بنها', 'شبرا الخيمة'] : ['مدينة نصر', 'الرحاب', 'القاهرة الجديدة'];
+      const options = gov === 'Qalyubia' ? ['الخصوص', 'بنها', 'شبرا الخيمة'] : ['مدينة نصر', 'التجمع الخامس', 'مصر الجديدة'];
       citySelect.innerHTML = options.map(c => `<option value="${c}">${c}</option>`).join('');
-      updateDeliveryAndTotal();
+      updateTotals();
     }
 
     function getDeliveryFee() {
       const gov = document.getElementById('governorateSelect').value;
-      return gov === 'Qalyubia' ? 20 : 25;
+      return gov === 'Qalyubia' ? 20 : 30;
     }
 
-    function updateDeliveryAndTotal() {
+    function updateTotals() {
       const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const tax = subtotal * 0.1;
       const delivery = getDeliveryFee();
@@ -69,60 +96,78 @@
     }
 
     function renderCartItems() {
-      const container = document.getElementById('cartItemsList');
+      const container = document.getElementById('cartItemsSection');
       if (!currentCart.length) {
-        container.innerHTML = '<div class="empty-cart">🛒 السلة فارغة، أضف بعض الأصناف من المنيو.</div>';
-        updateDeliveryAndTotal();
+        container.innerHTML = `<div class="empty-cart">🛒 سلة المشتريات فارغة<br><a href="index.html">اذهب لاستعراض المنيو</a></div>`;
+        updateTotals();
         return;
       }
+
       container.innerHTML = currentCart.map(item => `
         <div class="cart-item" data-id="${item.id}">
-          <div class="cart-item-details">
+          <div class="cart-item-info">
             <h4>${item.name}</h4>
-            <div class="cart-price">${item.price} ج.م</div>
+            <div class="cart-item-price">${item.price} ج.م</div>
           </div>
-          <div class="cart-actions">
-            <input type="number" min="1" value="${item.quantity}" class="cart-qty" data-id="${item.id}">
-            <button class="remove-item" data-id="${item.id}">🗑️ حذف</button>
+          <div class="cart-item-controls">
+            <button class="qty-decr" data-id="${item.id}">−</button>
+            <span class="qty-num">${item.quantity}</span>
+            <button class="qty-incr" data-id="${item.id}">+</button>
+            <button class="remove-item-btn" data-id="${item.id}">🗑️</button>
           </div>
         </div>
       `).join('');
 
-      // أحداث تغيير الكمية
-      document.querySelectorAll('.cart-qty').forEach(inp => {
-        inp.onchange = (e) => {
-          const id = inp.getAttribute('data-id');
-          let newQty = parseInt(inp.value);
-          if (isNaN(newQty) || newQty < 1) newQty = 1;
-          updateCartItemQuantity(id, newQty);
-          currentCart = getCartWithDetails(); // إعادة تحميل السلة مع التفاصيل
-          renderCartItems();
-          updateDeliveryAndTotal();
-          updateCartBadge();
-        };
+      // أحداث التحكم في الكمية
+      document.querySelectorAll('.qty-incr').forEach(btn => {
+        btn.onclick = () => changeQuantity(btn.getAttribute('data-id'), 1);
       });
-
-      document.querySelectorAll('.remove-item').forEach(btn => {
-        btn.onclick = (e) => {
-          const id = btn.getAttribute('data-id');
-          removeFromCart(id);
-          currentCart = getCartWithDetails();
-          renderCartItems();
-          updateDeliveryAndTotal();
-          updateCartBadge();
-        };
+      document.querySelectorAll('.qty-decr').forEach(btn => {
+        btn.onclick = () => changeQuantity(btn.getAttribute('data-id'), -1);
       });
-      updateDeliveryAndTotal();
+      document.querySelectorAll('.remove-item-btn').forEach(btn => {
+        btn.onclick = () => removeItem(btn.getAttribute('data-id'));
+      });
+      updateTotals();
     }
 
-    function updateCartBadge() {
+    function changeQuantity(id, delta) {
+      let cart = getCart();
+      const index = cart.findIndex(i => i.id === id);
+      if (index !== -1) {
+        const newQty = cart[index].quantity + delta;
+        if (newQty <= 0) {
+          cart.splice(index, 1);
+        } else {
+          cart[index].quantity = newQty;
+        }
+        saveCart(cart);
+        loadCartAndRender();
+      }
+    }
+
+    function removeItem(id) {
+      let cart = getCart();
+      cart = cart.filter(i => i.id !== id);
+      saveCart(cart);
+      loadCartAndRender();
+    }
+
+    function loadCartAndRender() {
+      currentCart = getCartWithDetails();
+      renderCartItems();
+      updateCartBadgeGlobal();
+    }
+
+    function updateCartBadgeGlobal() {
       const cart = getCart();
-      const total = cart.reduce((sum, i) => sum + i.quantity, 0);
+      const total = cart.reduce((s, i) => s + i.quantity, 0);
       const badge = document.getElementById('cartCountBadge');
       if (badge) badge.innerText = total;
+      // تحديث أيقونة السلة في الصفحة الحالية غير موجودة، لكن ننفذ للتأكد
     }
 
-    async function sendOrderToTelegram() {
+    async function sendOrder() {
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const altPhone = document.getElementById('altPhone').value.trim();
@@ -131,12 +176,12 @@
       const address = document.getElementById('fullAddress').value.trim();
 
       if (!name || !phone || !address) {
-        alert('❌ الرجاء ملء الاسم، رقم الجوال، والعنوان.');
-        return false;
+        alert('❌ الرجاء ملء جميع الحقول المطلوبة');
+        return;
       }
       if (!currentCart.length) {
-        alert('السلة فارغة!');
-        return false;
+        alert('🛒 السلة فارغة');
+        return;
       }
 
       const orderNumber = getNextOrderNumber();
@@ -148,68 +193,57 @@
       const tax = subtotal * 0.1;
       const delivery = getDeliveryFee();
       const total = subtotal + tax + delivery;
-      const altLine = altPhone ? `📞 رقم بديل: ${altPhone}\n` : '';
+      const altLine = altPhone ? `📞 بديل: ${altPhone}\n` : '';
 
-      const message = `🍔 طلب جديد من بافلو بونو 🍔
-🧾 رقم الطلب: #${orderNumber}
+      const msg = `🍔 طلب جديد من BONO 🍔
+🧾 رقم #${orderNumber}
 
 👤 الاسم: ${name}
-📞 الجوال: ${phone}
+📞 جوال: ${phone}
 ${altLine}📍 العنوان: ${address}, ${city} - ${gov}
 --------------------------------
 ${itemsText}
 💰 المجموع: ${subtotal} ج.م
-🧾 ضريبة 10%: ${tax} ج.م
-🚚 التوصيل: ${delivery} ج.م
+🧾 ضريبة: ${tax} ج.م
+🚚 توصيل: ${delivery} ج.م
 💵 الإجمالي: ${total} ج.م
 
-شكراً لطلبكم!`;
+نشكرك على طلبك!`;
 
       const BOT_TOKEN = "8748571642:AAGMmoWmXH3ewRPow5igyacYkamBpeJ3jd0";
       const CHAT_ID = "987968411";
-
       try {
         const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+          body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
         });
         const data = await res.json();
         if (data.ok) {
           alert(`✅ تم إرسال طلبك بنجاح! رقم الطلب: ${orderNumber}`);
           clearCart();
-          currentCart = [];
-          renderCartItems();
-          updateCartBadge();
+          loadCartAndRender();
           document.getElementById('custName').value = '';
           document.getElementById('custPhone').value = '';
           document.getElementById('altPhone').value = '';
           document.getElementById('fullAddress').value = '';
-          return true;
+          updateTotals();
         } else {
-          alert('❌ فشل الإرسال إلى تليجرام، حاول مرة أخرى.');
-          return false;
+          alert('❌ فشل الإرسال إلى تليجرام');
         }
       } catch (err) {
-        console.error(err);
-        alert('❌ خطأ في الشبكة، تأكد من اتصالك بالإنترنت.');
-        return false;
+        alert('❌ خطأ في الشبكة');
       }
     }
 
     // تهيئة الصفحة
     initData();
-    currentCart = getCartWithDetails();
-    renderCartItems();
-    updateCartBadge();
+    loadCartAndRender();
     updateCities();
-
-    document.getElementById('governorateSelect').addEventListener('change', () => {
-      updateCities();
-      updateDeliveryAndTotal();
-    });
-    document.getElementById('citySelect').addEventListener('change', () => updateDeliveryAndTotal());
-    document.getElementById('confirmOrderBtn').addEventListener('click', sendOrderToTelegram);
+    document.getElementById('governorateSelect').addEventListener('change', () => { updateCities(); updateTotals(); });
+    document.getElementById('citySelect').addEventListener('change', () => updateTotals());
+    document.getElementById('confirmOrderBtn').addEventListener('click', sendOrder);
+    document.getElementById('backToMenuBtn').addEventListener('click', () => window.location.href = 'index.html');
   </script>
 </body>
 </html>
