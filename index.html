@@ -4,73 +4,132 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BONO | المنيو</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:#0a0a0a; color:#f0efe7; font-family:'Inter',sans-serif; direction:rtl; }
-    .app { max-width:600px; margin:0 auto; background:#0f0f0f; min-height:100vh; padding-bottom:70px; }
-    /* الهيدر */
-    .main-header { position:sticky; top:0; display:flex; justify-content:space-between; padding:16px 20px; background:rgba(10,10,10,0.9); backdrop-filter:blur(12px); border-bottom:1px solid #2c2c2c; z-index:100; }
-    .logo { font-weight:800; font-size:1.6rem; background:linear-gradient(135deg,#f5b642,#ffdd99); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .cart-icon { position:relative; background:none; border:none; font-size:1.8rem; cursor:pointer; color:#f5b642; }
-    .cart-badge { position:absolute; top:-8px; right:-12px; background:#f5b642; color:#000; font-size:0.7rem; border-radius:30px; padding:2px 6px; }
-    /* البانر */
-    .hero-section { height:240px; background:linear-gradient(135deg,#1f1a15,#0a0a0a); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; text-align:center; position:relative; }
-    .hero-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.5); }
-    .hero-content { position:relative; z-index:2; padding:20px; }
-    .hero-content h1 { font-size:2rem; font-weight:800; background:linear-gradient(135deg,#f5b642,#ffdd99); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .hero-cta { background:#f5b642; border:none; margin-top:16px; padding:8px 24px; border-radius:60px; font-weight:bold; cursor:pointer; }
-    /* الفئات */
-    .categories-scroll { display:flex; overflow-x:auto; gap:12px; padding:16px; white-space:nowrap; }
-    .category-btn { background:#1e1e1e; border:none; padding:8px 24px; border-radius:40px; color:#b0a890; font-weight:600; cursor:pointer; }
-    .category-btn.active { background:#f5b642; color:#0a0a0a; }
-    /* بطاقات المنيو */
-    .menu-container { padding:16px; display:flex; flex-direction:column; gap:16px; }
-    .menu-card { background:#141414; border-radius:24px; display:flex; gap:16px; border:1px solid #2c2c2c; transition:0.2s; }
-    .menu-card:hover { border-color:#f5b642; }
-    .card-img { width:110px; }
-    .card-img img { width:100%; height:110px; object-fit:cover; border-radius:20px 0 0 20px; }
-    .card-details { flex:1; padding:12px; }
-    .item-title { font-size:1.1rem; font-weight:700; }
-    .item-desc { font-size:0.7rem; color:#b0a890; margin:4px 0; }
-    .item-footer { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
-    .item-price { color:#f5b642; font-weight:800; }
-    .add-to-cart { background:#f5b642; border:none; border-radius:40px; padding:6px 14px; font-weight:bold; cursor:pointer; }
-    /* الشريط السفلي */
-    .bottom-nav { position:fixed; bottom:0; width:100%; max-width:600px; background:#111; display:flex; justify-content:space-around; padding:10px 0; border-top:1px solid #2c2c2c; }
-    .nav-item { color:#b0a890; text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:0.7rem; }
-    .nav-item.active { color:#f5b642; font-weight:bold; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: #0a0a0a; color: #fff; direction: rtl; }
+    .app { max-width: 600px; margin: 0 auto; background: #0f0f0f; min-height: 100vh; padding-bottom: 75px; }
+    .main-header { position: sticky; top: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #2a2a2a; }
+    .logo { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #f5b642, #ffdd99); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cart-icon-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #f5b642; position: relative; }
+    .cart-badge { position: absolute; top: -6px; right: -10px; background: #f5b642; color: #0a0a0a; font-size: 0.7rem; border-radius: 50%; padding: 2px 6px; min-width: 18px; }
+    .hero-section { height: 240px; background: linear-gradient(135deg, #1f1a15, #0c0b0a); display: flex; align-items: center; justify-content: center; text-align: center; background-size: cover; }
+    .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); width: 100%; height: 100%; }
+    .hero-content { position: relative; z-index: 2; padding: 20px; }
+    .hero-content h1 { font-size: 2.3rem; background: linear-gradient(135deg, #f5b642, #ffdd99); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-cta { background: #f5b642; border: none; margin-top: 20px; padding: 10px 24px; border-radius: 60px; font-weight: bold; cursor: pointer; }
+    .categories-wrapper { padding: 16px 0 8px; border-bottom: 1px solid #2a2a2a; }
+    .categories-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 0 16px; }
+    .category-btn { background: #1e1e1e; border: none; padding: 8px 24px; border-radius: 40px; font-weight: 600; color: #bbb; white-space: nowrap; cursor: pointer; }
+    .category-btn.active { background: #f5b642; color: #0a0a0a; }
+    .menu-container { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .menu-item-card { background: #141414; border-radius: 24px; display: flex; gap: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+    .card-image { width: 110px; flex-shrink: 0; }
+    .card-image img { width: 100%; height: 110px; object-fit: cover; display: block; }
+    .card-details { flex: 1; padding: 12px 0 12px 12px; }
+    .item-title { font-size: 1.1rem; font-weight: 700; }
+    .item-description { font-size: 0.75rem; color: #aaa; margin: 6px 0 8px; }
+    .item-footer { display: flex; justify-content: space-between; align-items: center; }
+    .item-price { color: #f5b642; font-weight: bold; }
+    .add-to-cart-btn { background: #f5b642; border: none; padding: 6px 14px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .add-to-cart-btn:active { transform: scale(0.96); }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2a2a; z-index: 99; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #aaa; text-decoration: none; font-size: 0.7rem; }
+    .nav-item.active { color: #f5b642; font-weight: bold; }
+    .nav-icon { font-size: 1.4rem; }
+    #dynamicToast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #f5b642; color: #000; padding: 8px 20px; border-radius: 60px; font-weight: bold; z-index: 999; opacity: 0; transition: opacity 0.2s; }
   </style>
 </head>
 <body>
 <div class="app">
   <header class="main-header">
-    <div class="logo">BONO</div>
-    <button id="cartBtn" class="cart-icon">🛒<span id="cartCount" class="cart-badge">0</span></button>
+    <div class="logo">🔥 BONO</div>
+    <button id="cartBtn" class="cart-icon-btn">🛒 <span id="cartCountBadge" class="cart-badge">0</span></button>
   </header>
-  <section class="hero-section" id="heroSection"><div class="hero-overlay"></div><div class="hero-content"><h1 id="siteTitle">بافلو بونو</h1><p id="siteSubtitle"></p><button id="scrollBtn" class="hero-cta">استعرض القائمة 👇</button></div></section>
-  <div class="categories-scroll" id="categoryTabs"></div>
-  <div class="menu-container" id="menuContainer"></div>
-  <nav class="bottom-nav"><a href="index.html" class="nav-item active">🍽️ المنيو</a><a href="cart.html" class="nav-item">🛒 السلة</a><a href="manage-items.html" class="nav-item">⚙️ إدارة</a><a href="backgrounds.html" class="nav-item">🎨 خلفيات</a></nav>
+  <section class="hero-section" id="heroSection">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 id="siteTitle">بافلو بونو</h1>
+      <p id="siteSubtitle" style="color:#ddd;">طعم يستحق التجربة 🔥</p>
+      <button id="scrollToMenuBtn" class="hero-cta">استعرض القائمة 👇</button>
+    </div>
+  </section>
+  <div class="categories-wrapper"><div class="categories-scroll" id="categoryTabs"></div></div>
+  <main class="menu-container" id="menuContainer"></main>
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">🍽️</span><span>المنيو</span></a>
+    <a href="cart.html" class="nav-item"><span class="nav-icon">🛒</span><span>السلة</span></a>
+    <a href="manage-items.html" class="nav-item"><span class="nav-icon">⚙️</span><span>إدارة</span></a>
+    <a href="backgrounds.html" class="nav-item"><span class="nav-icon">🎨</span><span>خلفيات</span></a>
+  </nav>
 </div>
-<script type="module">
-  import { getAllCategories, getAllMenuItems, getBackgroundSettings, addToCart, getCart, showToast } from './common.js';
-  let activeCat = null;
-  async function loadHero() { const bg = await getBackgroundSettings(); const hero = document.getElementById('heroSection'); if(bg.heroImage) hero.style.backgroundImage = `url('${bg.heroImage}')`; document.getElementById('siteTitle').innerText = bg.siteTitle; document.getElementById('siteSubtitle').innerText = bg.siteSubtitle; }
-  async function renderMenu() {
-    const cats = await getAllCategories(); const items = await getAllMenuItems();
-    if(!cats.length) return; if(!activeCat && cats.length) activeCat = cats[0].id;
-    document.getElementById('categoryTabs').innerHTML = cats.map(c => `<button class="category-btn ${activeCat===c.id?'active':''}" data-id="${c.id}">${c.nameAr}</button>`).join('');
-    document.querySelectorAll('.category-btn').forEach(btn => btn.onclick = () => { activeCat=btn.dataset.id; renderMenu(); });
-    const filtered = items.filter(i => i.categoryId === activeCat);
-    if(!filtered.length) { document.getElementById('menuContainer').innerHTML = '<div style="text-align:center;padding:40px">لا توجد أصناف</div>'; return; }
-    document.getElementById('menuContainer').innerHTML = filtered.map(item => `<div class="menu-card"><div class="card-img"><img src="${item.imageUrl||'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23333%22/%3E%3Ctext x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23aaa%22%3E🍔%3C/text%3E%3C/svg%3E'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23333%22/%3E%3Ctext x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23aaa%22%3E🍔%3C/text%3E%3C/svg%3E'"></div><div class="card-details"><h3 class="item-title">${item.nameAr}</h3><p class="item-desc">${item.descAr||''}</p><div class="item-footer"><span class="item-price">${item.price} ج.م</span><button class="add-to-cart" data-id="${item.id}">+ أضف</button></div></div></div>`).join('');
-    document.querySelectorAll('.add-to-cart').forEach(btn => btn.onclick = () => { addToCart(btn.dataset.id); updateCartCount(); showToast('✓ تمت الإضافة'); });
+<div id="dynamicToast"></div>
+
+<script>
+  // بيانات وهمية (بدون Firebase)
+  const categories = [
+    { id: "beef", nameAr: "🍔 برجر لحم" },
+    { id: "chicken", nameAr: "🍗 برجر دجاج" },
+    { id: "fries", nameAr: "🍟 مقليات" }
+  ];
+  const menuItems = [
+    { id: "b1", categoryId: "beef", nameAr: "بافلو كلاسيك", descAr: "لحم بقري مشوي مع صوص بافلو", price: 45, imageUrl: "https://via.placeholder.com/110x110?text=Burger" },
+    { id: "b2", categoryId: "beef", nameAr: "برجر تكساس", descAr: "جبنة ببر جاك، هلابينو حار", price: 55, imageUrl: "https://via.placeholder.com/110x110?text=Texas" },
+    { id: "c1", categoryId: "chicken", nameAr: "تشيكن كرسبي", descAr: "دجاج مقرمش بصوص الثوم", price: 40, imageUrl: "https://via.placeholder.com/110x110?text=Chicken" },
+    { id: "f1", categoryId: "fries", nameAr: "بطاطس بالجبنة", descAr: "بطاطس مقلية مع صوص جبنة", price: 25, imageUrl: "https://via.placeholder.com/110x110?text=Fries" }
+  ];
+
+  let activeCategoryId = "beef";
+  let cart = JSON.parse(localStorage.getItem('bono_cart')) || [];
+
+  function updateCartBadge() {
+    const total = cart.reduce((s, i) => s + i.quantity, 0);
+    document.getElementById('cartCountBadge').innerText = total;
   }
-  async function updateCartCount() { const cart = getCart(); const total = cart.reduce((s,i)=>s+i.quantity,0); document.getElementById('cartCount').innerText = total; }
-  document.getElementById('cartBtn').onclick = () => location.href='cart.html';
-  document.getElementById('scrollBtn').onclick = () => document.querySelector('.categories-scroll').scrollIntoView({behavior:'smooth'});
-  await loadHero(); await renderMenu(); await updateCartCount();
+
+  function addToCart(id) {
+    const existing = cart.find(i => i.id === id);
+    if (existing) existing.quantity++;
+    else cart.push({ id, quantity: 1 });
+    localStorage.setItem('bono_cart', JSON.stringify(cart));
+    updateCartBadge();
+    showToast('✓ تمت الإضافة');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('dynamicToast');
+    t.innerText = msg;
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2000);
+  }
+
+  function renderMenu() {
+    const tabsContainer = document.getElementById('categoryTabs');
+    const menuContainer = document.getElementById('menuContainer');
+    tabsContainer.innerHTML = categories.map(cat => `<button class="category-btn ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">${cat.nameAr}</button>`).join('');
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.onclick = () => { activeCategoryId = btn.getAttribute('data-cat-id'); renderMenu(); };
+    });
+    const filtered = menuItems.filter(item => item.categoryId === activeCategoryId);
+    if (!filtered.length) { menuContainer.innerHTML = '<div style="text-align:center;padding:40px;">لا توجد أصناف</div>'; return; }
+    menuContainer.innerHTML = filtered.map(item => `
+      <div class="menu-item-card">
+        <div class="card-image"><img src="${item.imageUrl}" alt="${item.nameAr}"></div>
+        <div class="card-details">
+          <h3 class="item-title">${item.nameAr}</h3>
+          <p class="item-description">${item.descAr}</p>
+          <div class="item-footer"><span class="item-price">${item.price} ج.م</span><button class="add-to-cart-btn" data-id="${item.id}">+ أضف</button></div>
+        </div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      btn.onclick = () => addToCart(btn.getAttribute('data-id'));
+    });
+  }
+
+  document.getElementById('scrollToMenuBtn').onclick = () => document.querySelector('.categories-wrapper').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('cartBtn').onclick = () => window.location.href = 'cart.html';
+  renderMenu();
+  updateCartBadge();
 </script>
 </body>
 </html>
