@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بافلو بونو | إدارة المنيو</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="bottom-nav">
+      <a href="index.html">🍔 المنيو</a>
+      <a href="cart.html">🛒 السلة</a>
+      <a href="manage-items.html" class="active">⚙️ إدارة الأصناف</a>
+      <a href="backgrounds.html">🖼️ الخلفيات</a>
+    </nav>
+
+    <div class="manage-page">
+      <h2>📦 إدارة الأصناف</h2>
+      <button id="addNewItemBtn" class="add-btn">➕ إضافة صنف جديد</button>
+
+      <div id="itemsList" class="items-admin-list"></div>
+    </div>
+
+    <!-- نموذج إضافة / تعديل (يظهر كـ Modal) -->
+    <div id="itemModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3 id="modalTitle">إضافة صنف</h3>
+        <input type="text" id="itemNameAr" placeholder="الاسم (عربي)">
+        <input type="text" id="itemDescAr" placeholder="الوصف (عربي)">
+        <input type="number" id="itemPrice" placeholder="السعر">
+        <select id="itemCategory">
+          <option value="beef">لحوم</option>
+          <option value="chicken">دجاج</option>
+          <option value="fries">مقليات</option>
+          <option value="sauces">صوصات</option>
+          <option value="combos">وجبات كاملة</option>
+        </select>
+        <label>صورة الصنف:</label>
+        <input type="file" id="itemImage" accept="image/*">
+        <div id="currentImagePreview" style="margin: 10px 0;"></div>
+        <button id="saveItemBtn" class="save-btn">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    let editingId = null;
+
+    function renderAdminList() {
+      const items = getAllMenuItems();
+      const container = document.getElementById('itemsList');
+      if (!items.length) {
+        container.innerHTML = '<div class="empty-state">لا توجد أصناف، أضف أول صنف</div>';
+        return;
+      }
+      container.innerHTML = items.map(item => `
+        <div class="admin-item-card" data-id="${item.id}">
+          <div class="admin-img">
+            <img src="${item.imageSrc || getDefaultItemImage()}" width="60" height="60" style="object-fit:cover; border-radius:12px;">
+          </div>
+          <div class="admin-info">
+            <strong>${item.nameAr}</strong>
+            <span>${item.price} ج.م</span>
+            <small>${item.categoryId}</small>
+          </div>
+          <div class="admin-actions">
+            <button class="edit-item" data-id="${item.id}">✏️ تعديل</button>
+            <button class="delete-item" data-id="${item.id}">🗑️ حذف</button>
+          </div>
+        </div>
+      `).join('');
+
+      // أحداث التحرير والحذف
+      document.querySelectorAll('.edit-item').forEach(btn => {
+        btn.onclick = () => openEditModal(btn.getAttribute('data-id'));
+      });
+      document.querySelectorAll('.delete-item').forEach(btn => {
+        btn.onclick = () => {
+          if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+            deleteMenuItem(btn.getAttribute('data-id'));
+            renderAdminList();
+          }
+        };
+      });
+    }
+
+    function openEditModal(id) {
+      editingId = id;
+      const items = getAllMenuItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('modalTitle').innerText = 'تعديل صنف';
+      document.getElementById('itemNameAr').value = item.nameAr;
+      document.getElementById('itemDescAr').value = item.descAr;
+      document.getElementById('itemPrice').value = item.price;
+      document.getElementById('itemCategory').value = item.categoryId;
+      const previewDiv = document.getElementById('currentImagePreview');
+      if (item.imageSrc) {
+        previewDiv.innerHTML = `<img src="${item.imageSrc}" width="80"><br><small>الصورة الحالية</small>`;
+      } else {
+        previewDiv.innerHTML = '';
+      }
+      document.getElementById('itemModal').style.display = 'flex';
+    }
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').innerText = 'إضافة صنف جديد';
+      document.getElementById('itemNameAr').value = '';
+      document.getElementById('itemDescAr').value = '';
+      document.getElementById('itemPrice').value = '';
+      document.getElementById('itemCategory').value = 'beef';
+      document.getElementById('currentImagePreview').innerHTML = '';
+      document.getElementById('itemImage').value = '';
+      document.getElementById('itemModal').style.display = 'flex';
+    }
+
+    async function saveCurrentItem() {
+      const nameAr = document.getElementById('itemNameAr').value.trim();
+      const descAr = document.getElementById('itemDescAr').value.trim();
+      const price = parseFloat(document.getElementById('itemPrice').value);
+      const categoryId = document.getElementById('itemCategory').value;
+      const imageFile = document.getElementById('itemImage').files[0];
+      let imageSrc = null;
+
+      if (!nameAr || isNaN(price) || price <= 0) {
+        alert('الاسم والسعر مطلوبان بصورة صحيحة');
+        return;
+      }
+
+      if (imageFile) {
+        imageSrc = await readFileAsBase64(imageFile);
+      } else if (editingId) {
+        const existing = getAllMenuItems().find(i => i.id === editingId);
+        if (existing && existing.imageSrc) imageSrc = existing.imageSrc;
+      }
+
+      if (editingId) {
+        updateMenuItem(editingId, { nameAr, descAr, price, categoryId, imageSrc });
+      } else {
+        addNewMenuItem({ nameAr, descAr, price, categoryId, imageSrc });
+      }
+      closeModal();
+      renderAdminList();
+    }
+
+    function closeModal() {
+      document.getElementById('itemModal').style.display = 'none';
+    }
+
+    function readFileAsBase64(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    initData();
+    renderAdminList();
+
+    document.getElementById('addNewItemBtn').onclick = openAddModal;
+    document.querySelector('.close-modal').onclick = closeModal;
+    document.getElementById('saveItemBtn').onclick = saveCurrentItem;
+    window.onclick = (e) => { if (e.target === document.getElementById('itemModal')) closeModal(); };
+  </script>
+</body>
+</html>
