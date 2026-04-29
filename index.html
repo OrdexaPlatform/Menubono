@@ -3,107 +3,182 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>بافلو بونو | المنيو الرئيسي</title>
+  <title>BONO | قائمة الطعام</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <nav class="bottom-nav">
-      <a href="index.html" class="active">🍔 المنيو</a>
-      <a href="cart.html">🛒 السلة (<span id="cartCountBadge">0</span>)</a>
-      <a href="manage-items.html">⚙️ إدارة الأصناف</a>
-      <a href="backgrounds.html">🖼️ الخلفيات</a>
-    </nav>
+  <div class="app">
+    <!-- الهيدر العلوي -->
+    <header class="main-header">
+      <div class="logo">
+        <span class="logo-icon">🍔</span>
+        <span class="logo-text">BONO</span>
+      </div>
+      <div class="header-actions">
+        <button id="cartBtn" class="cart-icon-btn">
+          🛒
+          <span id="cartCountBadge" class="cart-badge">0</span>
+        </button>
+        <button id="menuToggleBtn" class="menu-toggle-btn" aria-label="القائمة">☰</button>
+      </div>
+    </header>
 
-    <div class="hero" style="background-image: url(''); background-size: cover;">
-      <h1 id="siteTitle">بافلو بونو</h1>
-      <p id="siteSubtitle">لحم مشوي على اللهب · دجاج مقرمش · صوصات بافلو</p>
+    <!-- البانر الرئيسي (Hero) -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 id="siteTitle">بافلو بونو</h1>
+        <p id="siteSubtitle">طعم يستحق التجربة 🔥</p>
+        <button id="scrollToMenuBtn" class="hero-cta">استعرض القائمة 👇</button>
+      </div>
+    </section>
+
+    <!-- شريط الفئات (أفقى قابل للتمرير) -->
+    <div class="categories-wrapper">
+      <div class="categories-scroll" id="categoryTabs"></div>
     </div>
 
-    <div id="categoryTabs" class="category-tabs"></div>
-    <div id="menuItemsContainer" class="menu-items-container"></div>
+    <!-- حاوية عرض الأصناف -->
+    <main class="menu-container" id="menuContainer">
+      <!-- سيتم ملؤها بواسطة JavaScript -->
+    </main>
+
+    <!-- شريط سفلي سريع (للتنقل بين الصفحات) -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon">🍽️</span>
+        <span>المنيو</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <span class="nav-icon">🛒</span>
+        <span>السلة</span>
+      </a>
+      <a href="manage-items.html" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span>إدارة</span>
+      </a>
+      <a href="backgrounds.html" class="nav-item">
+        <span class="nav-icon">🎨</span>
+        <span>خلفيات</span>
+      </a>
+    </nav>
   </div>
+
   <script src="common.js"></script>
   <script>
-    let activeCategory = null;
+    let activeCategoryId = null;
 
+    // عرض الفئات والأصناف
     function renderMenu() {
       const categories = getAllCategories();
       const items = getAllMenuItems();
-      const container = document.getElementById('menuItemsContainer');
       const tabsContainer = document.getElementById('categoryTabs');
+      const menuContainer = document.getElementById('menuContainer');
+
       if (!categories.length) return;
 
-      // تبويبات الفئات
-      tabsContainer.innerHTML = '';
-      categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `category-tab ${activeCategory === cat.id ? 'active' : ''}`;
-        btn.textContent = cat.nameAr;
-        btn.onclick = () => {
-          activeCategory = cat.id;
+      // تعيين أول فئة إذا لم تكن محددة
+      if (!activeCategoryId && categories.length) activeCategoryId = categories[0].id;
+
+      // عرض أزرار الفئات
+      tabsContainer.innerHTML = categories.map(cat => `
+        <button class="category-btn ${activeCategoryId === cat.id ? 'active' : ''}" data-cat-id="${cat.id}">
+          ${cat.nameAr}
+        </button>
+      `).join('');
+
+      // إضافة حدث النقر على الفئات
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          activeCategoryId = btn.getAttribute('data-cat-id');
           renderMenu();
-        };
-        tabsContainer.appendChild(btn);
+        });
       });
 
-      if (!activeCategory && categories.length) activeCategory = categories[0].id;
-
-      const filtered = items.filter(item => item.categoryId === activeCategory);
+      // تصفية الأصناف حسب الفئة
+      const filtered = items.filter(item => item.categoryId === activeCategoryId);
       if (!filtered.length) {
-        container.innerHTML = '<div class="empty-state">لا توجد أصناف في هذه الفئة</div>';
+        menuContainer.innerHTML = `<div class="empty-menu">🚫 لا توجد أصناف في هذه الفئة</div>`;
         return;
       }
 
-      // عرض البطاقات مع الصور
-      container.innerHTML = filtered.map(item => {
+      // عرض الأصناف كبطاقات احترافية
+      menuContainer.innerHTML = filtered.map(item => {
         const imgSrc = item.imageSrc || getDefaultItemImage();
         return `
-          <div class="menu-card">
-            <div class="card-img">
-              <img src="${imgSrc}" alt="${item.nameAr}" onerror="this.src='${getDefaultItemImage()}'">
+          <div class="menu-item-card" data-item-id="${item.id}">
+            <div class="card-image">
+              <img src="${imgSrc}" alt="${item.nameAr}" loading="lazy">
             </div>
-            <div class="card-info">
-              <h3>${item.nameAr}</h3>
-              <p class="desc">${item.descAr}</p>
-              <div class="price">${item.price} ج.م</div>
-              <button class="add-to-cart" data-id="${item.id}">➕ أضف للسلة</button>
+            <div class="card-details">
+              <h3 class="item-title">${item.nameAr}</h3>
+              <p class="item-description">${item.descAr || 'وصف شهي'}</p>
+              <div class="item-footer">
+                <span class="item-price">${item.price} ج.م</span>
+                <button class="add-to-cart-btn" data-id="${item.id}">+ أضف</button>
+              </div>
             </div>
           </div>
         `;
       }).join('');
 
-      // إضافة أحداث الأزرار
-      document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.onclick = (e) => {
+      // ربط أحداث الإضافة للسلة
+      document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const id = btn.getAttribute('data-id');
           addToCart(id);
           updateCartBadge();
-          showToast('✓ تمت الإضافة');
-        };
+          showToast('✓ تم إضافة الصنف');
+          // تأثير بسيط
+          btn.style.transform = 'scale(0.9)';
+          setTimeout(() => btn.style.transform = '', 150);
+        });
       });
     }
 
     function updateCartBadge() {
       const cart = getCart();
-      const total = cart.reduce((sum, i) => sum + i.quantity, 0);
+      const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
       const badge = document.getElementById('cartCountBadge');
-      if (badge) badge.innerText = total;
+      if (badge) badge.innerText = totalQty;
     }
 
-    // تحميل الخلفيات والإعدادات
-    function applyBackgrounds() {
+    // تحميل الخلفيات والنصوص
+    function applyGlobalSettings() {
       const bg = getBackgroundSettings();
+      const heroSection = document.getElementById('heroSection');
       if (bg.heroImage) {
-        document.querySelector('.hero').style.backgroundImage = `url('${bg.heroImage}')`;
+        heroSection.style.backgroundImage = `url('${bg.heroImage}')`;
+        heroSection.style.backgroundSize = 'cover';
+        heroSection.style.backgroundPosition = 'center';
+      } else {
+        heroSection.style.backgroundImage = 'linear-gradient(135deg, #1f1a15, #0c0b0a)';
       }
       if (bg.siteTitle) document.getElementById('siteTitle').innerText = bg.siteTitle;
       if (bg.siteSubtitle) document.getElementById('siteSubtitle').innerText = bg.siteSubtitle;
     }
 
-    // تهيئة الصفحة
-    initData();      // إنشاء بيانات افتراضية إن لم توجد
-    applyBackgrounds();
+    // التمرير السلس للقائمة
+    document.getElementById('scrollToMenuBtn')?.addEventListener('click', () => {
+      document.querySelector('.categories-wrapper')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // زر القائمة للهواتف (يمكن استخدامه لاحقاً)
+    document.getElementById('menuToggleBtn')?.addEventListener('click', () => {
+      // يمكن إضافة قائمة جانبية، لكننا نكتفي بالشريط السفلي
+    });
+
+    // الانتقال لصفحة السلة
+    document.getElementById('cartBtn')?.addEventListener('click', () => {
+      window.location.href = 'cart.html';
+    });
+
+    initData();
+    applyGlobalSettings();
     renderMenu();
     updateCartBadge();
   </script>
