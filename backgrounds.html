@@ -2,129 +2,178 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BONO | تخصيص المظهر</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>BONO | إعدادات المظهر</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    .bg-card {
-      background: var(--bg-card);
-      border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-    .preview-img {
-      margin: 12px 0;
-      max-width: 200px;
-      border-radius: 16px;
-    }
-    button {
-      background: var(--gold);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 40px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #f0efe7; font-family: 'Inter', sans-serif; direction: rtl; }
+    .app { max-width: 600px; margin: 0 auto; background: #0f0f0f; min-height: 100vh; padding-bottom: 70px; }
+    .main-header { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #2c2c2c; z-index: 100; }
+    .logo { font-weight: 800; font-size: 1.6rem; background: linear-gradient(135deg,#f5b642,#ffdd99); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .logout-btn { background: #2c2c2c; border: none; padding: 6px 12px; border-radius: 30px; color: #f5b642; cursor: pointer; font-family: inherit; }
+    .admin-content { padding: 20px; }
+    .bg-card { background: #111; border-radius: 28px; padding: 20px; margin-bottom: 24px; border: 1px solid #2c2c2c; }
+    .bg-card h3 { margin-bottom: 16px; color: #f5b642; }
+    .bg-card input, .bg-card textarea { width: 100%; margin-bottom: 12px; padding: 12px; background: #242424; border: 1px solid #3d3d3d; border-radius: 28px; color: white; font-family: inherit; }
+    .bg-card button { background: #f5b642; border: none; padding: 10px 20px; border-radius: 40px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+    .preview-img { margin-top: 12px; max-width: 100%; border-radius: 20px; border: 1px solid #3d3d3d; }
+    .login-panel { text-align: center; padding: 60px 20px; }
+    .login-panel input { width: 80%; padding: 12px; margin: 10px auto; background: #242424; border: 1px solid #3d3d3d; border-radius: 40px; color: white; display: block; }
+    .login-panel button { background: #f5b642; border: none; padding: 10px 30px; border-radius: 40px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2c2c2c; z-index: 99; }
+    .nav-item { color: #b0a890; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; }
+    .nav-item.active { color: #f5b642; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="main-header">
-      <div class="logo">🎨 تخصيص الموقع</div>
-      <div class="header-actions">
-        <button id="backBtn" class="icon-btn">← العودة</button>
-      </div>
-    </header>
-    <main style="padding: 20px;">
+<div class="app">
+  <header class="main-header">
+    <div class="logo">🎨 BONO</div>
+    <button id="logoutBtn" class="logout-btn" style="display: none;">تسجيل خروج</button>
+  </header>
+
+  <!-- لوحة الإدارة (تظهر بعد تسجيل الدخول) -->
+  <div id="adminPanel" style="display: none;">
+    <div class="admin-content">
       <div class="bg-card">
-        <h3>صورة خلفية الهيدر (البنر)</h3>
-        <input type="file" id="heroImgInput" accept="image/*">
-        <div id="heroPreview" class="preview-img"></div>
-        <button id="saveHeroBtn">حفظ الخلفية</button>
+        <h3>🖼️ صورة الهيدر (البانر الرئيسي)</h3>
+        <input type="file" id="heroImageInput" accept="image/*">
+        <div id="heroPreview"></div>
+        <button id="saveHeroBtn">حفظ صورة الهيدر</button>
       </div>
+
       <div class="bg-card">
-        <h3>الصورة الافتراضية للأصناف</h3>
-        <input type="file" id="defaultImgInput" accept="image/*">
-        <div id="defaultPreview" class="preview-img"></div>
-        <button id="saveDefaultBtn">حفظ الصورة الافتراضية</button>
+        <h3>🖼️ الصورة الافتراضية للأصناف (عند عدم وجود صورة)</h3>
+        <input type="file" id="defaultItemImageInput" accept="image/*">
+        <div id="defaultImgPreview"></div>
+        <button id="saveDefaultImgBtn">حفظ الصورة الافتراضية</button>
       </div>
+
       <div class="bg-card">
-        <h3>عنوان الموقع والنص الفرعي</h3>
-        <input type="text" id="siteTitle" placeholder="العنوان الرئيسي">
-        <input type="text" id="siteSubtitle" placeholder="النص الفرعي" style="margin-top: 12px;">
-        <button id="saveTextsBtn" style="margin-top: 16px;">حفظ النصوص</button>
+        <h3>📝 نصوص الموقع الرئيسية</h3>
+        <input type="text" id="siteTitleInput" placeholder="عنوان الموقع (مثال: بافلو بونو)">
+        <input type="text" id="siteSubtitleInput" placeholder="النص الفرعي (مثال: طعم يستحق التجربة)">
+        <button id="saveTextsBtn">حفظ النصوص</button>
       </div>
-    </main>
-    <nav class="bottom-nav">
-      <a href="index.html" class="nav-item">🍽️ المنيو</a>
-      <a href="cart.html" class="nav-item">🛒 السلة</a>
-      <a href="manage-items.html" class="nav-item">⚙️ إدارة</a>
-      <a href="backgrounds.html" class="nav-item active">🎨 خلفيات</a>
-    </nav>
+    </div>
   </div>
-  <script src="common.js"></script>
-  <script>
-    function previewFile(input, previewId) {
-      const file = input.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" width="150" style="border-radius: 12px;">`;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-    document.getElementById('heroImgInput').onchange = () => previewFile(document.getElementById('heroImgInput'), 'heroPreview');
-    document.getElementById('defaultImgInput').onchange = () => previewFile(document.getElementById('defaultImgInput'), 'defaultPreview');
 
-    function loadSettings() {
-      const bg = getBackgroundSettings();
-      if (bg.heroImage) document.getElementById('heroPreview').innerHTML = `<img src="${bg.heroImage}" width="150">`;
-      if (bg.defaultItemImage) document.getElementById('defaultPreview').innerHTML = `<img src="${bg.defaultItemImage}" width="150">`;
-      document.getElementById('siteTitle').value = bg.siteTitle || '';
-      document.getElementById('siteSubtitle').value = bg.siteSubtitle || '';
-    }
+  <!-- شاشة تسجيل الدخول -->
+  <div id="loginPanel" class="login-panel">
+    <h2>🔐 دخول المدير</h2>
+    <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+    <input type="password" id="loginPassword" placeholder="كلمة المرور">
+    <button id="doLoginBtn">تسجيل الدخول</button>
+  </div>
 
-    async function saveHero() {
-      const file = document.getElementById('heroImgInput').files[0];
-      if (file) {
-        const base64 = await readFileAsBase64(file);
-        const settings = getBackgroundSettings();
-        settings.heroImage = base64;
-        saveBackgroundSettings(settings);
-        alert('تم حفظ خلفية الهيدر');
-      } else alert('اختر صورة أولاً');
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">🍽️ المنيو</a>
+    <a href="cart.html" class="nav-item">🛒 السلة</a>
+    <a href="manage-items.html" class="nav-item">⚙️ إدارة</a>
+    <a href="backgrounds.html" class="nav-item active">🎨 خلفيات</a>
+  </nav>
+</div>
+
+<script type="module">
+  import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-init.js';
+  import { getBackgroundSettings, saveBackgroundSettings, uploadImageToCloudinary, showToast } from './common.js';
+
+  let currentUser = null;
+
+  function showAdminUI() {
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'block';
+    loadCurrentSettings();
+  }
+
+  function showLoginUI() {
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('loginPanel').style.display = 'block';
+    document.getElementById('logoutBtn').style.display = 'none';
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      showAdminUI();
+    } else {
+      currentUser = null;
+      showLoginUI();
     }
-    async function saveDefault() {
-      const file = document.getElementById('defaultImgInput').files[0];
-      if (file) {
-        const base64 = await readFileAsBase64(file);
-        const settings = getBackgroundSettings();
-        settings.defaultItemImage = base64;
-        saveBackgroundSettings(settings);
-        alert('تم حفظ الصورة الافتراضية');
-      }
+  });
+
+  document.getElementById('doLoginBtn').onclick = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pwd = document.getElementById('loginPassword').value.trim();
+    if (!email || !pwd) return alert('أدخل البريد وكلمة المرور');
+    try {
+      await signInWithEmailAndPassword(auth, email, pwd);
+      showToast('تم تسجيل الدخول');
+    } catch (e) {
+      alert('بيانات غير صحيحة');
     }
-    function saveTexts() {
-      const settings = getBackgroundSettings();
-      settings.siteTitle = document.getElementById('siteTitle').value;
-      settings.siteSubtitle = document.getElementById('siteSubtitle').value;
-      saveBackgroundSettings(settings);
-      alert('تم حفظ النصوص');
+  };
+
+  document.getElementById('logoutBtn').onclick = async () => {
+    await auth.signOut();
+    showToast('تم تسجيل الخروج');
+  };
+
+  async function loadCurrentSettings() {
+    const settings = await getBackgroundSettings();
+    document.getElementById('siteTitleInput').value = settings.siteTitle || '';
+    document.getElementById('siteSubtitleInput').value = settings.siteSubtitle || '';
+    if (settings.heroImage) {
+      document.getElementById('heroPreview').innerHTML = `<img src="${settings.heroImage}" class="preview-img" width="200">`;
     }
-    function readFileAsBase64(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsDataURL(file);
-      });
+    if (settings.defaultItemImage) {
+      document.getElementById('defaultImgPreview').innerHTML = `<img src="${settings.defaultItemImage}" class="preview-img" width="200">`;
     }
-    initData();
-    loadSettings();
-    document.getElementById('saveHeroBtn').onclick = saveHero;
-    document.getElementById('saveDefaultBtn').onclick = saveDefault;
-    document.getElementById('saveTextsBtn').onclick = saveTexts;
-    document.getElementById('backBtn').onclick = () => window.location.href = 'index.html';
-  </script>
+  }
+
+  async function saveHeroImage() {
+    const file = document.getElementById('heroImageInput').files[0];
+    if (!file) return alert('اختر صورة أولاً');
+    try {
+      const imageUrl = await uploadImageToCloudinary(file);
+      const settings = await getBackgroundSettings();
+      settings.heroImage = imageUrl;
+      await saveBackgroundSettings(settings);
+      document.getElementById('heroPreview').innerHTML = `<img src="${imageUrl}" class="preview-img" width="200">`;
+      showToast('تم حفظ صورة الهيدر');
+    } catch (err) {
+      alert('فشل رفع الصورة: ' + err.message);
+    }
+  }
+
+  async function saveDefaultImage() {
+    const file = document.getElementById('defaultItemImageInput').files[0];
+    if (!file) return alert('اختر صورة أولاً');
+    try {
+      const imageUrl = await uploadImageToCloudinary(file);
+      const settings = await getBackgroundSettings();
+      settings.defaultItemImage = imageUrl;
+      await saveBackgroundSettings(settings);
+      document.getElementById('defaultImgPreview').innerHTML = `<img src="${imageUrl}" class="preview-img" width="200">`;
+      showToast('تم حفظ الصورة الافتراضية للأصناف');
+    } catch (err) {
+      alert('فشل رفع الصورة: ' + err.message);
+    }
+  }
+
+  async function saveTexts() {
+    const settings = await getBackgroundSettings();
+    settings.siteTitle = document.getElementById('siteTitleInput').value.trim();
+    settings.siteSubtitle = document.getElementById('siteSubtitleInput').value.trim();
+    await saveBackgroundSettings(settings);
+    showToast('تم حفظ النصوص');
+  }
+
+  document.getElementById('saveHeroBtn').onclick = saveHeroImage;
+  document.getElementById('saveDefaultImgBtn').onclick = saveDefaultImage;
+  document.getElementById('saveTextsBtn').onclick = saveTexts;
+</script>
 </body>
 </html>
